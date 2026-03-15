@@ -46,24 +46,26 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// Serve static files from frontend
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Health Check Endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Style Fair Events API is running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // API Routes
 app.use(inquiryRoutes);
 
 // 404 Handler - Routes that are not API/static
 app.use((req, res) => {
-  // If requesting an API endpoint that doesn't exist
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({
-      success: false,
-      message: 'API endpoint not found'
-    });
-  }
-  
-  // Otherwise serve SPA
-  res.sendFile(path.join(__dirname, '../frontend/pages/index.html'));
+  res.status(404).json({
+    success: false,
+    message: 'API endpoint not found',
+    path: req.path
+  });
 });
 
 // Global Error Handling Middleware (must be last)
